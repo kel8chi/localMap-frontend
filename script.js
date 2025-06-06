@@ -12,12 +12,12 @@ class MapManager {
         this.nextId = 12; // Start IDs after wema.json's last ID (11)
         this.geocodeCache = new Map();
         this.styles = {
-            publication: { color: '#ff7800' },
-            event: { color: '#00ff00' },
-            vendor: { color: '#0000ff' },
-            service: { color: '#ff00ff' },
-            waste: { color: '#FF00FF' },
-            trending: { color: '#000000' },
+            publication: { color: '#ff7800' }, // Orange
+            event: { color: '#00ff00' }, // Green
+            vendor: { color: '#0000ff' }, // Blue
+            service: { color: '#ff00ff' }, // Magenta
+            waste: { color: '#800080' }, // Purple
+            trending: { color: '#ff0000' }, // Red
         };
         this.tileLayers = {
             light: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -29,14 +29,17 @@ class MapManager {
                 maxZoom: 19,
             }),
         };
-        this.gpsIcon = L.icon({
-            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/images/marker-icon.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/images/marker-shadow.png',
-            shadowSize: [41, 41],
-        });
+        // Define category-specific icons
+        this.icons = Object.keys(this.styles).reduce((acc, category) => {
+            acc[category] = L.divIcon({
+                className: `custom-pin custom-pin-${category}`,
+                html: `<div style="background-color: ${this.styles[category].color}; width: 25px; height: 41px; clip-path: polygon(50% 0%, 100% 40%, 75% 100%, 25% 100%, 0% 40%); position: relative; border: 1px solid #000;"><div style="background-color: white; width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 8px; left: 7.5px; border: 1px solid #000;"></div></div>`,
+                iconSize: [25, 41],
+                iconAnchor: [12.5, 41],
+                popupAnchor: [0, -41],
+            });
+            return acc;
+        }, {});
     }
 
     initializeMap() {
@@ -145,7 +148,10 @@ class MapManager {
             this.geojsonData = await response.json();
 
             this.dataLayer = L.geoJSON(this.geojsonData, {
-                pointToLayer: (feature, latlng) => L.marker(latlng, { icon: this.gpsIcon }),
+                pointToLayer: (feature, latlng) => {
+                    const category = feature.properties.category;
+                    return L.marker(latlng, { icon: this.icons[category] || this.icons['publication'] });
+                },
                 onEachFeature: (feature, layer) => {
                     layer.bindPopup(`
                         <b>${feature.properties.title}</b><br>
@@ -344,7 +350,7 @@ class MapManager {
                 const vendorPoint = turf.point(vendor.geometry.coordinates);
                 if (turf.booleanPointInPolygon(vendorPoint, buffer)) {
                     L.marker([vendor.geometry.coordinates[1], vendor.geometry.coordinates[0]], {
-                        icon: this.gpsIcon,
+                        icon: this.icons['vendor'],
                     })
                         .addTo(this.map)
                         .bindPopup(`<b>Nearby Vendor: ${vendor.properties.title}</b>`);
