@@ -1,6 +1,6 @@
 class MapManager {
     constructor() {
-        this.JSON_PATH = 'data/wema.json';
+        this.JSON_PATH = 'data/lomap.json';
         this.DEFAULT_COORDS = { lat: 9.0820, lon: 8.6753 }; // Nigeria center
         this.SEARCH_RADIUS_KM = 50;
         this.map = null;
