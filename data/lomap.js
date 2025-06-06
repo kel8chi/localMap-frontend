@@ -1,0 +1,153 @@
+const geojsonData = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "category": "publication",
+        "title": "Solar Energy Report",
+        "description": "2025 Solar Trends in Nigeria, focusing on renewable energy advancements.",
+        "link": "https://example.com/solar-report"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [3.3792, 6.5244] // Lagos: [lon, lat]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2,
+        "category": "event",
+        "title": "Green Tech Expo",
+        "description": "Sustainability Conference showcasing green innovations in Abuja.",
+        "date": "2025-06-10"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.3986, 9.0765] // Abuja
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "category": "vendor",
+        "title": "EcoSolar Ltd",
+        "description": "Leading solar panel supplier in Port Harcourt."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0068, 4.8146] // Rivers
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 4,
+        "category": "vendor",
+        "title": "Ecospoon Ltd",
+        "description": "Solar panel supplier providing eco-friendly solutions in Kaduna."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.4180, 10.4648] // Kaduna
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5,
+        "category": "vendor",
+        "title": "E-move Ltd",
+        "description": "Electric vehicle supplier promoting sustainable transport in Kano."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.5402, 11.9519] // Kano
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6,
+        "category": "service",
+        "title": "Ecosurance Ltd",
+        "description": "SDG consultancy offering environmental solutions in Delta."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.4664, 6.0000] // Delta
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 7,
+        "category": "waste",
+        "title": "WasteKontrol Ltd",
+        "description": "Waste disposal company improving sanitation in Borno."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.1500, 11.8333] // Borno
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8,
+        "category": "waste",
+        "title": "Local Klean",
+        "description": "Innovative electric dump truck waste disposal startup in Plateau.",
+        "link": "https://example.com/local-klean"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.8000, 9.7667] // Plateau
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9,
+        "category": "trending",
+        "title": "Toxic Smoke and Fog",
+        "description": "Burning illegal waste dump causing environmental pollution.",
+        "link": "https://example.com/toxic-smoke"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.2002, 12.4417] // Corrected typo
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10,
+        "category": "trending",
+        "title": "Petrol Tanker Fire",
+        "description": "Road accident involving two petrol tankers causing uncontrollable fire.",
+        "link": "https://example.com/tanker-fire"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.5167, 8.4917]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 11,
+        "category": "service",
+        "title": "GreenConsult",
+        "description": "Environmental consulting firm promoting sustainability in Oyo."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [3.8964, 7.3878] // Oyo
+      }
+    }
+  ]
+};
