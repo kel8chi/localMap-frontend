@@ -15,19 +15,20 @@ html, body {
     top: 10px;
     left: 10px;
     z-index: 1000;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     max-width: 400px;
-    width: 300px;
-    max-height: 80vh;
+    width: 320px;
+    max-height: 85vh;
     overflow-y: auto;
     transition: all 0.3s ease;
-    padding: 10px;
+    padding: 15px;
+    backdrop-filter: blur(5px);
 }
 
 .sidebar.collapsed {
-    height: 40px;
+    height: 50px;
     overflow: hidden;
 }
 
@@ -36,7 +37,7 @@ body.dark-theme {
 }
 
 body.dark-theme .sidebar {
-    background: #2c2c2c;
+    background: rgba(44, 44, 44, 0.95);
     color: #ffffff;
 }
 
@@ -51,8 +52,7 @@ body.dark-theme .form-control::placeholder {
     color: #ccc;
 }
 
-body.dark-theme .btn-primary,
-body.dark-theme .btn-secondary {
+body.dark-theme .btn-primary {
     background: #007bff;
     border-color: #007bff;
 }
@@ -77,4 +77,98 @@ body.dark-theme .btn-secondary {
 
 .toast-container {
     z-index: 2000;
+}
+
+/* Beeping Pin Animation */
+.custom-pin {
+    animation: beep 1.5s infinite ease-in-out;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes beep {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+body.dark-theme .custom-pin {
+    filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3));
+}
+
+/* Custom Dropdown Styling */
+.custom-select {
+    position: relative;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px;
+    font-size: 1rem;
+    color: #333;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpolyline points="6 9 12 15 18 9"%3E%3C/polyline%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 18px;
+}
+
+.custom-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.custom-select option {
+    padding: 10px;
+    background: #fff;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.custom-select option:hover {
+    background: #f0f0f0;
+}
+
+body.dark-theme .custom-select {
+    background: #3a3a3a;
+    color: #fff;
+    border-color: #555;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpolyline points="6 9 12 15 18 9"%3E%3C/polyline%3E%3C/svg%3E');
+}
+
+body.dark-theme .custom-select option {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+body.dark-theme .custom-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Smooth Dropdown Animation */
+.custom-select:not(:focus) + .form-select-options {
+    display: none;
+}
+
+.form-select-options {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
