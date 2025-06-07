@@ -1,13 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     class MapManager {
         constructor() {
+            // Map configuration
             this.map = null;
             this.dataLayer = null;
-            this.geojsonData = window.geojsonData || { features: [] };
+            this.geojsonData = { features: [] };
             this.selectedCategory = 'all';
-            this.defaultCenter = [9.0820, 8.6753]; // Nigeria center
+            this.defaultCenter = [9.0820, 8.6753]; // Nigeria
             this.defaultZoom = 6;
 
+            // Style definitions for categories
             this.styles = {
                 publication: { color: '#ff7800', label: 'Publication' },
                 event: { color: '#00ff00', label: 'Event' },
@@ -18,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
+        // Initialize the Leaflet map
         initializeMap() {
-            console.log('Initializing map...');
             const mapElement = document.getElementById('map');
             if (!mapElement) {
                 this.showError('Map container not found.');
@@ -35,29 +37,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                     maxZoom: 18,
                 }).addTo(this.map);
-                console.log('Map initialized');
                 return true;
             } catch (error) {
                 this.showError('Failed to initialize map.');
-                console.error('Map init error:', error);
+                console.error('Map initialization error:', error);
                 return false;
             }
         }
 
+        // Fetch GeoJSON data
+        async fetchGeoJson() {
+            try {
+                const response = await fetch('data/lomap.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                this.geojsonData = await response.json();
+                if (!this.geojsonData.features?.length) {
+                    throw new Error('GeoJSON data is empty or invalid.');
+                }
+                console.log(`Loaded ${this.geojsonData.features.length} GeoJSON features`);
+            } catch (error) {
+                this.showError('Failed to load GeoJSON data. Check data/wema.json.');
+                console.error('GeoJSON fetch error:', error);
+                throw error;
+            }
+        }
+
+        // Load GeoJSON data onto the map
         loadGeoJson() {
-            console.log('Loading GeoJSON...');
             if (!this.geojsonData.features.length) {
-                this.showError('No GeoJSON data loaded. Check data/lomap.js.');
-                console.error('GeoJSON missing:', this.geojsonData);
+                this.showError('No GeoJSON data available.');
                 return;
             }
             try {
+                // Remove existing layer if present
+                if (this.dataLayer) {
+                    this.map.removeLayer(this.dataLayer);
+                }
                 this.dataLayer = L.geoJSON(this.geojsonData, {
                     pointToLayer: (feature, latlng) => {
                         const category = feature.properties?.category || 'publication';
                         const [lon, lat] = feature.geometry.coordinates;
                         if (isNaN(lat) || isNaN(lon)) {
-                            console.warn(`Invalid coordinates for: ${feature.properties?.title || 'Unnamed'}`);
+                            console.warn(`Invalid coordinates for feature: ${feature.properties?.title || 'Unnamed'}`);
                             return null;
                         }
                         return L.circleMarker(latlng, {
@@ -70,99 +93,110 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     },
                     filter: (feature) => {
-                        return feature.geometry?.coordinates?.length === 2 &&
-                               !isNaN(feature.geometry.coordinates[0]) &&
-                               !isNaN(feature.geometry.coordinates[1]);
+                        const isValid = feature.geometry?.type === 'Point' &&
+                            Array.isArray(feature.geometry.coordinates) &&
+                            feature.geometry.coordinates.length === 2 &&
+                            !isNaN(feature.geometry.coordinates[0]) &&
+                            !isNaN(feature.geometry.coordinates[1]);
+                        if (!isValid) {
+                            console.warn(`Filtered out invalid feature: ${feature.properties?.title || 'Unnamed'}`);
+                        }
+                        return isValid && (this.selectedCategory === 'all' || feature.properties?.category === this.selectedCategory);
                     },
                     onEachFeature: (feature, layer) => {
                         if (layer) {
                             const category = feature.properties?.category || 'unknown';
-                            layer.bindPopup(`
-                                <strong>${feature.properties.title || 'Untitled'}</strong><br>
-                                ${feature.properties.description || 'No description'}<br>
-                                Category: ${this.styles[category]?.label || 'Unknown'}<br>
-                                ${feature.properties.link ? `<a href="${feature.properties.link}" target="_blank" rel="noopener">Link</a>` : ''}
-                                ${feature.properties.date ? `<br>Date: ${feature.properties.date}` : ''}
-                            `);
+                            layer.bindPopup(this.createPopupContent(feature, category));
                         }
                     },
-                });
-                this.filterLayer();
-                this.map.addLayer(this.dataLayer);
+                }).addTo(this.map);
+                // Fit map to bounds if valid
                 const bounds = this.dataLayer.getBounds();
                 if (bounds.isValid()) {
-                    this.map.fitBounds(bounds);
+                    this.map.fitBounds(bounds, { padding: [50, 50] });
                 }
-                console.log('GeoJSON loaded:', this.geojsonData.features.length, 'features');
             } catch (error) {
                 this.showError('Failed to load map data.');
                 console.error('GeoJSON load error:', error);
             }
         }
 
-        filterLayer() {
-            console.log('Filtering layer:', this.selectedCategory);
-            this.dataLayer.eachLayer(layer => {
-                const category = layer.feature.properties?.category || 'publication';
-                layer.setStyle({
-                    fillOpacity: (this.selectedCategory === 'all' || category === this.selectedCategory) ? 0.8 : 0,
-                    opacity: (this.selectedCategory === 'all' || category === this.selectedCategory) ? 1 : 0,
-                });
-            });
+        // Create popup content for a feature
+        createPopupContent(feature, category) {
+            const props = feature.properties;
+            return `
+                <strong>${props.title || 'Untitled'}</strong><br>
+                ${props.description || 'No description'}<br>
+                Category: ${this.styles[category]?.label || 'Unknown'}<br>
+                ${props.link ? `<a href="${props.link}" target="_blank" rel="noopener" class="link-primary">Link</a>` : ''}
+                ${props.date ? `<br>Date: ${props.date}` : ''}
+            `;
         }
 
+        // Initialize sidebar interactions
         initializeInteractions() {
-            console.log('Initializing interactions...');
-            const toggleSidebar = document.getElementById('toggleSidebar');
-            const sidebarContent = document.getElementById('sidebarContent');
-            const categoryFilter = document.getElementById('categoryFilter');
-            const themeSelect = document.getElementById('themeSelect');
+            const elements = {
+                toggleSidebar: document.getElementById('toggleSidebar'),
+                sidebarContent: document.getElementById('sidebarContent'),
+                categoryFilter: document.getElementById('categoryFilter'),
+                themeSelect: document.getElementById('themeSelect'),
+            };
 
-            if (!toggleSidebar || !sidebarContent || !categoryFilter || !themeSelect) {
+            if (Object.values(elements).some(el => !el)) {
                 this.showError('Failed to initialize controls.');
-                console.error('Missing DOM elements:', { toggleSidebar, sidebarContent, categoryFilter, themeSelect });
+                console.error('Missing DOM elements:', elements);
                 return;
             }
 
-            // Bootstrap collapse toggle
-            toggleSidebar.addEventListener('click', () => {
-                const bsCollapse = new bootstrap.Collapse(sidebarContent, { toggle: true });
-                const isVisible = sidebarContent.classList.contains('show');
-                toggleSidebar.setAttribute('aria-expanded', isVisible);
-                console.log('Sidebar toggled:', isVisible ? 'visible' : 'hidden');
+            // Sidebar toggle
+            elements.toggleSidebar.addEventListener('click', () => {
+                const bsCollapse = new bootstrap.Collapse(elements.sidebarContent, { toggle: true });
+                const isVisible = elements.sidebarContent.classList.contains('show');
+                elements.toggleSidebar.setAttribute('aria-expanded', isVisible);
+                elements.toggleSidebar.querySelector('i').className = isVisible ? 'bi bi-x' : 'bi bi-list';
             });
 
-            categoryFilter.addEventListener('change', (e) => {
+            // Category filter
+            elements.categoryFilter.addEventListener('change', (e) => {
                 this.selectedCategory = e.target.value;
-                console.log('Category selected:', this.selectedCategory);
-                this.filterLayer();
+                console.log('Selected category:', this.selectedCategory);
+                this.loadGeoJson(); // Reload layer with filter
             });
 
-            themeSelect.addEventListener('change', (e) => {
+            // Theme switcher
+            elements.themeSelect.addEventListener('change', (e) => {
                 document.body.className = `${e.target.value}-theme`;
                 console.log('Theme changed to:', e.target.value);
             });
         }
 
+        // Display error message
         showError(message) {
             const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                setTimeout(() => errorDiv.style.display = 'none', 5000);
+            }
         }
 
-        start() {
-            console.log('Starting MapManager...');
-            if (this.initializeMap()) {
+        // Start the application
+        async start() {
+            if (!this.initializeMap()) {
+                return;
+            }
+            try {
+                await this.fetchGeoJson();
                 this.loadGeoJson();
                 this.initializeInteractions();
-                console.log('MapManager started successfully');
+                console.log('MapManager initialized successfully');
+            } catch (error) {
+                console.error('MapManager startup failed:', error);
             }
         }
     }
 
+    // Initialize and start the map
     const mapManager = new MapManager();
     mapManager.start();
 });
